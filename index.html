@@ -148,9 +148,10 @@
       <p class="setup-similar-label">Петр Петров</p>
     </div>
   </template>
+ <canvas id="canvas"></canvas>
   <script>
-  const LEFT_SPEED = 5;
-  const RIGHT_SPEED = 2;
+  const LEFT_SPEED = 95;
+  const RIGHT_SPEED = 92;
   const PROPORTION = 1.337;
   const HEIGHT_FIELD_IN_PART = 3;
 
@@ -173,8 +174,9 @@
   var getWizardY = function(gameFieldHeight) {
     return gameFieldHeight / HEIGHT_FIELD_IN_PART;
   }
-
   </script>
+
+  <script src="js/stat.js"></script>
   <script src="js/game.js"></script>
 </body>
 
