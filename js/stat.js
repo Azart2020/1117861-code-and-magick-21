@@ -1,86 +1,145 @@
 'use strict';
 
+const Cloud = {
+  WIDTH: 420,
+  HEIGHT: 270,
+  X: 100,
+  Y: 10,
+  GAP: 10,
+  SHADOW_COLOR: 'rgba(0, 0, 0, 0.3)',
+  BACKGROUND_COLOR: '#fff'
+};
+const Rect = {
+  X: 100,
+  Y: 180
+}
 
-const CLOUD_WIDTH = 420;
-const CLOUD_HEIGHT = 270;
-const CLOUD_X = 100;
-const CLOUD_Y = 10;
-const CLOUD_GAP = 10;
-const RECT_X = 100;
-const RECT_Y = 180;
 const GAP = 50;
 const FONT_GAP = 15;
-const BAR_WIDTH = 40;
-const BAR_HEIGHT = 150 - GAP;
 
-var renderCloud = function (ctx, x, y, color) {
+const Bar = {
+  WIDTH: 40,
+  HEIGHT: 150 - GAP
+}
+const Player = {
+  NAME: 'Вы',
+  COLOR: 'rgb(255, 0, 0)'
+}
+
+const Saturation = {
+  MIN: 30,
+  MAX: 100
+}
+
+const Font = {
+  TYPE: '16px PT Mono',
+  STYLE: '#000',
+  BASELINE: 'hanging'
+}
+const Text = {
+  FIRST: 'Ура вы победили!',
+  SECOND: 'Список результатов:'
+}
+
+let renderCloud = function(ctx, x, y, width, height, color) {
   ctx.fillStyle = color;
-  ctx.fillRect(x, y, CLOUD_WIDTH, CLOUD_HEIGHT);
+  ctx.fillRect(x, y, width, height);
 };
 
 
-var getMaxElement = function (arr) {
-  var maxElement = arr[0];
+let getMaxElement = function(elements) {
+  let maxElement = elements[0];
 
-  for (var i = 1; i < arr.length; i++) {
-    if (arr[i] > maxElement) {
-      maxElement = arr[i];
-    }
+  for (var i = 1; i < elements.length; i++) {
+    maxElement = Math.max(maxElement, elements[i]);
   }
   return maxElement;
 };
 
-var getColumnColor = function (player) {
-  if (player === 'Вы') {
-    return 'rgb(255, 0, 0)';
-  } else {
-    return 'hsl(240, ' + Math.random(30, 100) * 100 + '%, 50%)';
-  }
+function getRandomNumber(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+let getRandomColumnColor = function() {
+  return 'hsl(240, ' + getRandomNumber(Saturation.MIN, Saturation.MAX) + '%, 50%)';
+}
+
+let getColumnColor = function(player) {
+  return player === Player.NAME ? Player.COLOR : getRandomColumnColor()
 };
 
-window.renderStatistics = function (ctx, player, times) {
-  renderCloud(
-      ctx,
-      CLOUD_X + CLOUD_GAP,
-      CLOUD_Y + CLOUD_GAP,
-      'rgba(0, 0, 0, 0.3)');
+let renderText = function(ctx, text, x, y) {
+  ctx.fillStyle = Font.STYLE;
+  ctx.font = Font.TYPE;
+  ctx.textBaseline = Font.BASELINE;
+  ctx.fillText(text, x, y)
+}
+
+window.renderStatistics = function(ctx, player, times) {
 
   renderCloud(
-      ctx,
-      CLOUD_X,
-      CLOUD_Y,
-      '#fff'
+    ctx,
+    Cloud.X + Cloud.GAP,
+    Cloud.Y + Cloud.GAP,
+    Cloud.WIDTH,
+    Cloud.HEIGHT,
+    Cloud.SHADOW_COLOR
   );
 
-  ctx.fillStyle = '#000';
-  ctx.font = '16px PT Mono';
-  ctx.textBaseline = 'hanging';
-  ctx.fillText('Ура вы победили!', CLOUD_X + FONT_GAP, CLOUD_Y + FONT_GAP);
-  ctx.fillText('Список результатов:', CLOUD_X + FONT_GAP, CLOUD_Y + FONT_GAP * 2);
+  renderCloud(
+    ctx,
+    Cloud.X,
+    Cloud.Y,
+    Cloud.WIDTH,
+    Cloud.HEIGHT,
+    Cloud.BACKGROUND_COLOR);
 
+  renderText(
+    ctx,
+    Text.FIRST,
+    Cloud.X + FONT_GAP,
+    Cloud.Y + FONT_GAP);
 
-  var maxTime = getMaxElement(times);
+  renderText(
+    ctx,
+    Text.SECOND,
+    Cloud.X + FONT_GAP,
+    Cloud.Y + FONT_GAP * 2);
 
+  let maxTime = getMaxElement(times);
 
   for (var i = 0; i < player.length; i++) {
+
     ctx.fillStyle = getColumnColor(player[i]);
+
+    let barX = Rect.X + GAP + (Bar.WIDTH + GAP) * i;
+    let barY = Rect.Y + GAP;
+    let barHeight = -(Bar.HEIGHT * times[i]) / maxTime;
+    let barPlayerY = Cloud.HEIGHT - FONT_GAP;
+    let barPlayerX = Cloud.X + GAP + (Bar.WIDTH + GAP) * i;
+    let barTimeY = -(Bar.HEIGHT * times[i]) / maxTime + GAP * 4;
+
     ctx.fillRect(
-        RECT_X + GAP + (BAR_WIDTH + GAP) * i,
-        RECT_Y + GAP,
-        BAR_WIDTH,
-        -(BAR_HEIGHT * times[i]) / maxTime
+      barX,
+      barY,
+      Bar.WIDTH,
+      barHeight
     );
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-    ctx.fillText(
-        player[i],
-        CLOUD_X + GAP + (BAR_WIDTH + GAP) * i,
-        CLOUD_HEIGHT - FONT_GAP
+    renderText(
+      ctx,
+      player[i],
+      barPlayerX,
+      barPlayerY
     );
 
-    ctx.fillText(
-        Math.round(times[i]),
-        RECT_X + GAP + (BAR_WIDTH + GAP) * i,
-        -(BAR_HEIGHT * times[i]) / maxTime + GAP * 4);
+    renderText(
+      ctx,
+      Math.round(times[i]),
+      barX,
+      barTimeY
+    );
   }
 };
